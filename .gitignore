@@ -1,0 +1,4 @@
+# Ignore raw source video (the live page uses the pre-extracted frames in assets/frames/)
+assets/*.mp4
+*.mp4
+
