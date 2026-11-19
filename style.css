@@ -1,0 +1,850 @@
+/* ==========================================================================
+   FEDERICO & LARA — SCROLL WORLD WEDDING INVITATION
+   Theme: Deep Forest / Emerald Dark Green ("Verde Oscuro"), Sage Mist & Gold
+   Layout: Mobile-First Top Info + Centered Uncropped 16:9 Video + Bottom Info
+   ========================================================================== */
+
+:root {
+  --green-deepest: #0b1811;
+  --green-dark: #12261a;
+  --green-card: rgba(18, 38, 26, 0.88);
+  --green-card-light: rgba(24, 49, 34, 0.92);
+  --green-mid: #1f402c;
+  --green-accent: #2d5a3f;
+  --green-sage: #b5cbbd;
+  --green-mist: rgba(18, 38, 26, 0.94);
+
+  --gold-main: #d4b475;
+  --gold-light: #f0dba8;
+  --gold-deep: #a58344;
+  --cream-text: #f7f4ec;
+  --cream-muted: #cedbd2;
+
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-script: 'Pinyon Script', cursive;
+  --font-sans: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --card-border: rgba(212, 180, 117, 0.38);
+  --card-shadow: 0 14px 36px rgba(5, 12, 8, 0.55), 0 0 0 1px rgba(212, 180, 117, 0.16) inset;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  font-size: 16px;
+  background-color: var(--green-deepest);
+  overscroll-behavior-y: none;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--cream-text);
+  background-color: var(--green-deepest);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ==========================================================================
+   1. LOADING SCREEN (Deep Forest Green & Gold)
+   ========================================================================== */
+.loader-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 45%, #1d3c2a 0%, #112419 60%, #09140e 100%);
+  transition: opacity 0.75s ease, visibility 0.75s ease;
+}
+
+.loader-screen.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loader-content {
+  text-align: center;
+  padding: 2.2rem 1.8rem;
+  max-width: 370px;
+  width: 90%;
+}
+
+.loader-monogram {
+  width: 68px;
+  height: 68px;
+  margin: 0 auto 1rem;
+  border-radius: 50%;
+  border: 1.5px solid var(--gold-main);
+  background: rgba(18, 38, 26, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--gold-light);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+.loader-title {
+  font-family: var(--font-script);
+  font-size: 2.9rem;
+  font-weight: 400;
+  color: var(--gold-light);
+  margin-bottom: 0.35rem;
+}
+
+.loader-subtitle {
+  font-size: 0.84rem;
+  color: var(--cream-muted);
+  margin-bottom: 1.35rem;
+  letter-spacing: 0.04em;
+}
+
+.loader-bar-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(212, 180, 117, 0.18);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 0.65rem;
+}
+
+.loader-bar-fill {
+  height: 100%;
+  width: 15%;
+  background: linear-gradient(90deg, var(--gold-deep), var(--gold-main), var(--gold-light));
+  border-radius: 999px;
+  transition: width 0.25s ease;
+}
+
+.loader-percent {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--gold-main);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ==========================================================================
+   2. FIXED SCROLL-WORLD VIEWPORT & VIDEO CANVAS
+   ========================================================================== */
+.scroll-world-viewport {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  z-index: 1;
+  background: var(--green-deepest);
+}
+
+.scroll-track {
+  position: relative;
+  width: 100%;
+  height: 1350vh;
+  z-index: 0;
+  pointer-events: none;
+}
+
+#scroll-world-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 1;
+}
+
+#mist-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* ==========================================================================
+   3. DARK GREEN ATMOSPHERIC MIST & CLOUD OVERLAY
+   ========================================================================== */
+.cloud-frame-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+  overflow: hidden;
+}
+
+.cloud-edge {
+  position: absolute;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+}
+
+.cloud-edge-top {
+  top: 0;
+  height: 16vh;
+  background: linear-gradient(
+    to bottom,
+    rgba(11, 24, 17, 0.92) 0%,
+    rgba(18, 38, 26, 0.55) 55%,
+    rgba(18, 38, 26, 0) 100%
+  );
+}
+
+.cloud-edge-bottom {
+  bottom: 0;
+  height: 18vh;
+  background: linear-gradient(
+    to top,
+    rgba(11, 24, 17, 0.95) 0%,
+    rgba(18, 38, 26, 0.62) 55%,
+    rgba(18, 38, 26, 0) 100%
+  );
+}
+
+.cloud-puff {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(36px);
+  opacity: 0.45;
+  background: radial-gradient(circle, rgba(45, 90, 63, 0.7) 0%, rgba(18, 38, 26, 0.3) 60%, transparent 80%);
+}
+
+.cloud-puff-1 {
+  width: 60vw;
+  height: 20vh;
+  top: 6vh;
+  left: -10vw;
+}
+
+.cloud-puff-2 {
+  width: 65vw;
+  height: 22vh;
+  bottom: 6vh;
+  right: -10vw;
+}
+
+/* ==========================================================================
+   4. TOP HUD HEADER & CHAPTER NAVIGATION
+   ========================================================================== */
+.hud-header {
+  position: fixed;
+  top: 10px;
+  left: 12px;
+  right: 12px;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.hud-brand {
+  pointer-events: auto;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 13px 5px 7px;
+  border-radius: 999px;
+  background: var(--green-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--card-border);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+.hud-monogram {
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold-main), var(--gold-deep));
+  color: var(--green-deepest);
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hud-names {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--gold-light);
+  letter-spacing: 0.02em;
+}
+
+.hud-chapters {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: var(--green-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--card-border);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+.chapter-dot {
+  border: none;
+  background: transparent;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--cream-muted);
+  cursor: pointer;
+  transition: all 0.22s ease;
+  white-space: nowrap;
+}
+
+.chapter-dot:hover {
+  color: var(--gold-light);
+  background: rgba(212, 180, 117, 0.12);
+}
+
+.chapter-dot.active {
+  background: linear-gradient(135deg, var(--gold-main), var(--gold-deep));
+  color: var(--green-deepest);
+  font-weight: 700;
+}
+
+.audio-toggle-btn {
+  pointer-events: auto;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--green-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--card-border);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  color: var(--gold-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.audio-toggle-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.audio-toggle-btn .icon-sound-on {
+  display: none;
+}
+
+.audio-toggle-btn.playing .icon-sound-off {
+  display: none;
+}
+
+.audio-toggle-btn.playing .icon-sound-on {
+  display: block;
+}
+
+/* Progress rail at top */
+.scroll-progress-rail {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3.5px;
+  background: rgba(255, 255, 255, 0.12);
+  z-index: 40;
+}
+
+.scroll-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--gold-deep), var(--gold-main), var(--gold-light));
+  box-shadow: 0 0 10px rgba(212, 180, 117, 0.65);
+}
+
+/* ==========================================================================
+   5. TOP & BOTTOM CARDS (Leaves the center 16:9 video 100% clear on mobile!)
+   ========================================================================== */
+.story-cards-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.corner-card {
+  position: absolute;
+  left: 50%;
+  width: min(94vw, 450px);
+  padding: 0.95rem 1.15rem;
+  border-radius: 18px;
+  background: linear-gradient(145deg, rgba(20, 43, 29, 0.92) 0%, rgba(13, 29, 20, 0.94) 100%);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--card-shadow);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+              visibility 0.4s;
+}
+
+.corner-card.compact-card {
+  padding: 0.8rem 1.05rem;
+}
+
+/* Top Zone: sits cleanly above the centered 16:9 video */
+.corner-card.pos-top {
+  top: 56px;
+  transform: translate3d(-50%, -14px, 0) scale(0.97);
+}
+
+/* Bottom Zone: sits cleanly below the centered 16:9 video */
+.corner-card.pos-bottom {
+  bottom: 42px;
+  transform: translate3d(-50%, 14px, 0) scale(0.97);
+}
+
+.corner-card.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translate3d(-50%, 0, 0) scale(1);
+}
+
+/* Card Typography */
+.card-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(212, 180, 117, 0.14);
+  border: 1px solid rgba(212, 180, 117, 0.38);
+  color: var(--gold-light);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 0.35rem;
+}
+
+.card-badge.no-mb {
+  margin-bottom: 0.25rem;
+}
+
+.card-script-title {
+  font-family: var(--font-script);
+  font-size: 2.25rem;
+  font-weight: 400;
+  color: var(--gold-light);
+  line-height: 1.05;
+  margin-bottom: 0.25rem;
+}
+
+.card-title {
+  font-family: var(--font-serif);
+  font-size: 1.38rem;
+  font-weight: 700;
+  color: var(--cream-text);
+  line-height: 1.15;
+  margin-bottom: 0.35rem;
+}
+
+.card-text {
+  font-size: 0.79rem;
+  line-height: 1.46;
+  color: var(--cream-muted);
+}
+
+.card-text.compact-mb {
+  margin-bottom: 0.55rem;
+}
+
+.quote-ref {
+  display: inline-block;
+  margin-left: 4px;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 600;
+  color: var(--gold-light);
+}
+
+.quote-inline {
+  font-family: var(--font-serif);
+  font-style: italic;
+  color: var(--gold-light);
+}
+
+.card-subnote {
+  font-size: 0.74rem;
+  line-height: 1.4;
+  color: var(--cream-muted);
+  margin-top: 0.35rem;
+  padding-top: 0.35rem;
+  border-top: 1px dashed rgba(212, 180, 117, 0.28);
+}
+
+/* Info Chips Grid (for Date, Time, Address) */
+.info-chips-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: 0.35rem;
+}
+
+.info-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 9px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(212, 180, 117, 0.22);
+  font-size: 0.75rem;
+  color: var(--cream-text);
+}
+
+.info-chip.full-chip {
+  grid-column: 1 / -1;
+}
+
+.info-chip svg {
+  width: 14px;
+  height: 14px;
+  color: var(--gold-main);
+  flex-shrink: 0;
+}
+
+/* Scroll Hint */
+.scroll-hint-inline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.78rem;
+  color: var(--gold-light);
+}
+
+.scroll-hint-inline strong {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--cream-text);
+}
+
+.hint-sub {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--cream-muted);
+}
+
+.scroll-mouse {
+  width: 18px;
+  height: 28px;
+  border: 1.8px solid var(--gold-main);
+  border-radius: 12px;
+  display: inline-flex;
+  justify-content: center;
+  padding-top: 4px;
+  flex-shrink: 0;
+}
+
+.scroll-wheel {
+  width: 3px;
+  height: 6px;
+  background: var(--gold-light);
+  border-radius: 2px;
+  animation: wheelBounce 1.5s infinite;
+}
+
+@keyframes wheelBounce {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(9px); opacity: 0; }
+}
+
+/* Countdown Grid */
+.cd-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.4rem;
+}
+
+.card-mini-label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--gold-light);
+}
+
+.date-pill-mini {
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(212, 180, 117, 0.16);
+  color: var(--gold-light);
+  border: 1px solid rgba(212, 180, 117, 0.3);
+}
+
+.countdown-mini-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.cd-item {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(212, 180, 117, 0.26);
+  border-radius: 10px;
+  padding: 5px 4px;
+  text-align: center;
+}
+
+.cd-num {
+  display: block;
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--gold-light);
+  line-height: 1.05;
+}
+
+.cd-lbl {
+  font-size: 0.62rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--cream-muted);
+}
+
+/* Action Buttons */
+.card-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.card-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 13px;
+  border-radius: 10px;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.card-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.card-btn-primary {
+  background: linear-gradient(135deg, var(--gold-main), var(--gold-deep));
+  color: var(--green-deepest);
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  flex: 1;
+}
+
+.card-btn-primary:hover {
+  filter: brightness(1.07);
+}
+
+.card-btn-outline {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--gold-light);
+  border: 1px solid rgba(212, 180, 117, 0.4);
+}
+
+.btn-sm {
+  flex: 0 0 auto;
+  padding: 7px 12px;
+}
+
+/* Bank Alias Box */
+.alias-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(212, 180, 117, 0.3);
+}
+
+.alias-lbl {
+  display: block;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  color: var(--cream-muted);
+}
+
+#bank-alias {
+  font-size: 0.82rem;
+  color: var(--gold-light);
+  letter-spacing: 0.03em;
+}
+
+/* Summary & RSVP Form */
+.summary-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 0.25rem;
+}
+
+.summary-item {
+  padding: 6px 9px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(212, 180, 117, 0.24);
+  font-size: 0.74rem;
+  color: var(--cream-text);
+}
+
+.summary-item strong {
+  color: var(--gold-light);
+}
+
+.rsvp-mini-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 0.3rem;
+}
+
+.rsvp-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.rsvp-row-submit {
+  display: flex;
+  gap: 6px;
+}
+
+.form-input,
+.form-select {
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: 9px;
+  border: 1px solid rgba(212, 180, 117, 0.35);
+  background: rgba(11, 24, 17, 0.85);
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  color: var(--cream-text);
+  outline: none;
+}
+
+.form-input::placeholder {
+  color: rgba(206, 219, 210, 0.6);
+}
+
+.form-input:focus,
+.form-select:focus {
+  border-color: var(--gold-light);
+}
+
+.btn-rsvp-send {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   6. BOTTOM SCENE INDICATOR PILL & TOAST
+   ========================================================================== */
+.bottom-scroll-pill {
+  position: fixed;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 25;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 14px;
+  border-radius: 999px;
+  background: rgba(13, 29, 20, 0.9);
+  border: 1px solid var(--card-border);
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--cream-muted);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.pill-divider {
+  color: var(--gold-main);
+}
+
+#scroll-percent-label {
+  color: var(--gold-light);
+  font-variant-numeric: tabular-nums;
+}
+
+.toast-notice {
+  position: fixed;
+  bottom: 55px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  z-index: 9000;
+  padding: 9px 18px;
+  border-radius: 999px;
+  background: var(--gold-main);
+  color: var(--green-deepest);
+  font-size: 0.8rem;
+  font-weight: 700;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.toast-notice.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ==========================================================================
+   7. RESPONSIVE ADJUSTMENTS (Mobile vs Desktop)
+   ========================================================================== */
+@media (max-width: 820px) {
+  .hud-chapters {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .rsvp-row-2 {
+    grid-template-columns: 1fr;
+  }
+  .rsvp-row-submit {
+    flex-direction: column;
+  }
+}
