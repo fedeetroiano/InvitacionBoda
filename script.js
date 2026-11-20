@@ -1,5 +1,5 @@
 /* ==========================================================================
-   LARA & FEDERICO — SCROLL WORLD ENGINE (621 FRAMES + PASTEL CLOUD EDGES + L&F SEAL)
+   LARA & FEDERICO — NATIVE 9:16 VERTICAL SCROLL WORLD ENGINE (621 HD FRAMES)
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -18,16 +18,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const TOTAL_FRAMES = 621;
   const frames = new Array(TOTAL_FRAMES).fill(null);
-
-  // Preload L&F circular logo to place over watermark coordinate (852, 432 -> 90.56% X, 83.33% Y)
-  const logoImg = new Image();
-  let isLogoLoaded = false;
-  logoImg.onload = () => {
-    isLogoLoaded = true;
-    lastDrawnFrameIndex = -1;
-    drawFrameForProgress(smoothProgress, true);
-  };
-  logoImg.src = 'assets/logo_lf.png';
 
   let targetProgress = 0;
   let smoothProgress = 0;
@@ -56,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
   resizeCanvas();
 
   // ==========================================================================
-  // 2. PROGRESSIVE IMAGE SEQUENCE LOADER
+  // 2. PROGRESSIVE IMAGE SEQUENCE LOADER (621 VERTICAL 9:16 FRAMES)
   // ==========================================================================
   function getFramePath(index) {
     return `assets/frames/frame_${ String(index).padStart(4, '0') }.jpg`;
@@ -123,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ==========================================================================
-  // 3. DRAW CENTERED VIDEO + SOFT CLOUD EDGE FADE + L&F LOGO AT WATERMARK
+  // 3. DRAW NATIVE 9:16 VERTICAL FRAME
   // ==========================================================================
   function getNearestLoadedFrame(targetIndex) {
     if (frames[targetIndex]) return { img: frames[targetIndex], index: targetIndex };
@@ -153,88 +143,40 @@ document.addEventListener('DOMContentLoaded', () => {
     lastDrawnFrameIndex = found.index;
 
     const img = found.img;
-    const sw = img.naturalWidth || 1280;
-    const sh = img.naturalHeight || 720;
-    const videoAspect = sw / sh;
+    const sw = img.naturalWidth || 720;
+    const sh = img.naturalHeight || 1280;
+    const frameAspect = sw / sh; // 9:16 (0.5625)
     const screenAspect = cw / ch;
 
-    // Clear canvas so the pastel clouds & botanical plants background shows around the video
     worldCtx.clearRect(0, 0, cw, ch);
 
     let drawW, drawH, drawX, drawY;
 
-    if (screenAspect < videoAspect) {
-      // Mobile / Portrait: full 16:9 width centered vertically, no cropping or zoom
+    if (screenAspect <= 0.85) {
+      // Mobile / Portrait screen: fill the vertical viewport while keeping the horizontal width 100% uncropped
       drawW = cw;
-      drawH = drawW / videoAspect;
-      drawX = 0;
-      drawY = (ch - drawH) * 0.5;
-    } else {
-      // Desktop / Landscape: centered with room at top & bottom for cloud border
-      drawH = ch * 0.72;
-      drawW = drawH * videoAspect;
-      if (drawW > cw * 0.92) {
-        drawW = cw * 0.92;
-        drawH = drawW / videoAspect;
+      drawH = drawW / frameAspect;
+      if (drawH < ch) {
+        drawH = ch;
+        drawW = drawH * frameAspect;
       }
       drawX = (cw - drawW) * 0.5;
       drawY = (ch - drawH) * 0.5;
+    } else {
+      // Desktop / Landscape monitor: display full 9:16 vertical stage centered with soft cloud side-fade
+      drawH = ch;
+      drawW = drawH * frameAspect;
+      drawX = (cw - drawW) * 0.5;
+      drawY = 0;
     }
 
     worldCtx.save();
-
-    // 1. Draw the crisp 16:9 video frame in the center
     worldCtx.drawImage(img, drawX, drawY, drawW, drawH);
 
-    // 2. Place L&F logo at exact Gemini watermark coordinate:
-    // (852, 432 in ~940x520 space = 90.56% X, 83.33% Y of the video frame)
-    const wmCenterX = drawX + drawW * 0.9056;
-    const wmCenterY = drawY + drawH * 0.8333;
-    const logoSize = Math.max(44 * dpr, drawW * 0.088);
-
-    // Soft pastel-cloud backing circle so the watermark is 100% covered
-    const bgRadius = logoSize * 0.54;
-    const haloGrad = worldCtx.createRadialGradient(
-      wmCenterX, wmCenterY, bgRadius * 0.75,
-      wmCenterX, wmCenterY, bgRadius * 1.25
-    );
-    haloGrad.addColorStop(0, 'rgba(246, 244, 238, 1)');
-    haloGrad.addColorStop(0.65, 'rgba(246, 244, 238, 0.96)');
-    haloGrad.addColorStop(1, 'rgba(246, 244, 238, 0)');
-
-    worldCtx.fillStyle = haloGrad;
-    worldCtx.beginPath();
-    worldCtx.arc(wmCenterX, wmCenterY, bgRadius * 1.25, 0, Math.PI * 2);
-    worldCtx.fill();
-
-    if (isLogoLoaded) {
-      worldCtx.drawImage(
-        logoImg,
-        wmCenterX - logoSize * 0.5,
-        wmCenterY - logoSize * 0.5,
-        logoSize,
-        logoSize
-      );
-    }
-
-    // 3. Soft cloud diffusion along the edges of the video (destination-in alpha mask)
-    // so the video melts softly into the watercolor pastel clouds & plants background
-    const fadeTop = drawH * 0.13;
-    const fadeBot = drawH * 0.15;
-
-    worldCtx.globalCompositeOperation = 'destination-in';
-
-    const vMask = worldCtx.createLinearGradient(0, drawY, 0, drawY + drawH);
-    vMask.addColorStop(0, 'rgba(0, 0, 0, 0)');
-    vMask.addColorStop(fadeTop / drawH, 'rgba(0, 0, 0, 1)');
-    vMask.addColorStop(1 - (fadeBot / drawH), 'rgba(0, 0, 0, 1)');
-    vMask.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    worldCtx.fillStyle = vMask;
-    worldCtx.fillRect(drawX, drawY, drawW, drawH);
-
-    // If desktop (video doesn't touch left/right screen edges), also feather left & right edges
-    if (drawX > 2) {
-      const fadeSide = drawW * 0.06;
+    // On wide desktop screens, softly feather the left and right edges of the 9:16 vertical video into the pastel clouds
+    if (drawX > 4) {
+      const fadeSide = drawW * 0.08;
+      worldCtx.globalCompositeOperation = 'destination-in';
       const hMask = worldCtx.createLinearGradient(drawX, 0, drawX + drawW, 0);
       hMask.addColorStop(0, 'rgba(0, 0, 0, 0)');
       hMask.addColorStop(fadeSide / drawW, 'rgba(0, 0, 0, 1)');
