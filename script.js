@@ -1,5 +1,7 @@
 /* ==========================================================================
-   LARA & FEDERICO — NATIVE 9:16 VERTICAL SCROLL WORLD ENGINE (621 HD FRAMES)
+   LARA & FEDERICO — CHAPTER AUTO-PLAYBACK ENGINE (NATIVE 9:16 FRAMES)
+   Stops: 0 (Sobre) → 110 (Torta) → 262 (Civil) → 414 (Salón) → 544 (Auto) → 600 (Noche/RSVP)
+   Triggers: Tap, small scroll/wheel, touch swipe, keyboard arrows, or nav rail
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -7,24 +9,48 @@ document.addEventListener('DOMContentLoaded', () => {
   const loaderBarFill = document.getElementById('loader-bar-fill');
   const loaderPercent = document.getElementById('loader-percent');
 
+  const stageViewport = document.getElementById('stage-viewport');
   const worldCanvas = document.getElementById('scroll-world-canvas');
   const worldCtx = worldCanvas.getContext('2d', { alpha: true });
 
-  const infoBlocks = Array.from(document.querySelectorAll('.info-block'));
+  const chapterGroups = Array.from(document.querySelectorAll('.chapter-group'));
+  const chapterAnnouncer = document.getElementById('chapter-announcer');
+  const navPrevBtn = document.getElementById('nav-prev-btn');
+  const navNextBtn = document.getElementById('nav-next-btn');
+
   const copyAliasBtn = document.getElementById('copy-alias-btn');
   const rsvpForm = document.getElementById('rsvp-form');
   const toastNotice = document.getElementById('toast-notice');
   const toastMessage = document.getElementById('toast-message');
 
+  // Exact chapter stop frames requested by user + opening (0) & starry night finale (600)
+  const CHAPTER_STOPS = [0, 110, 262, 414, 544, 600];
+  const CHAPTER_LABELS = [
+    'Portada: Lara y Federico',
+    'Fecha de la boda y cuenta regresiva',
+    'Ceremonia Civil: Registro Civil, Viernes 12 de Marzo de 2027',
+    'Ceremonia en el Salón del Reino, Sábado 13 de Marzo de 2027',
+    'Presente y alias bancario',
+    'Resumen y confirmación de asistencia'
+  ];
+
   const TOTAL_FRAMES = 621;
   const frames = new Array(TOTAL_FRAMES).fill(null);
 
-  let targetProgress = 0;
-  let smoothProgress = 0;
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  // Playback state
+  let currentStopIndex = 0;
+  let targetStopIndex = 0;
+  let currentFrame = 0;
+  let isPlaying = false;
   let lastDrawnFrameIndex = -1;
+  let lastFrameTimestamp = 0;
+  let lastTriggerTime = 0;
+  let lastTouchEndTime = 0;
 
   // ==========================================================================
-  // 1. RESIZE CANVAS
+  // 1. CANVAS SIZING
   // ==========================================================================
   let viewW = window.innerWidth;
   let viewH = window.innerHeight;
@@ -39,21 +65,25 @@ document.addEventListener('DOMContentLoaded', () => {
     worldCanvas.height = Math.round(viewH * dpr);
 
     lastDrawnFrameIndex = -1;
-    drawFrameForProgress(smoothProgress, true);
+    drawFrame(Math.round(currentFrame), true);
   }
 
   window.addEventListener('resize', resizeCanvas);
   resizeCanvas();
 
   // ==========================================================================
-  // 2. PROGRESSIVE IMAGE SEQUENCE LOADER (621 VERTICAL 9:16 FRAMES)
+  // 2. PRIORITY PROGRESSIVE FRAME PRELOADER
   // ==========================================================================
   function getFramePath(index) {
-    return `assets/frames/frame_${ String(index).padStart(4, '0') }.jpg`;
+    return `assets/frames/frame_${String(index).padStart(4, '0')}.jpg`;
   }
 
   function loadSingleFrame(index) {
     return new Promise((resolve) => {
+      if (index < 0 || index >= TOTAL_FRAMES) {
+        resolve(null);
+        return;
+      }
       if (frames[index]) {
         resolve(frames[index]);
         return;
@@ -70,44 +100,44 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function preloadFrameSequence() {
-    await loadSingleFrame(0);
-    drawFrameForProgress(0, true);
+    // Stage 0: Load all exact chapter stop frames first so instant jumps always look crisp
+    await Promise.all(CHAPTER_STOPS.map((idx) => loadSingleFrame(idx)));
+    drawFrame(0, true);
 
-    const stage1Indices = [];
-    for (let i = 0; i < TOTAL_FRAMES; i += 6) {
-      stage1Indices.push(i);
-    }
-    if (stage1Indices[stage1Indices.length - 1] !== TOTAL_FRAMES - 1) {
-      stage1Indices.push(TOTAL_FRAMES - 1);
-    }
+    // Stage 1: Load coarse pass across 0..600 + dense pass for first segment (0..110)
+    const stage1Set = new Set();
+    for (let i = 0; i <= 110; i += 2) stage1Set.add(i);
+    for (let i = 110; i <= 600; i += 6) stage1Set.add(i);
+    const stage1Indices = Array.from(stage1Set).filter((i) => !frames[i]);
 
     let loadedStage1 = 0;
     const CONCURRENCY = 12;
 
     for (let i = 0; i < stage1Indices.length; i += CONCURRENCY) {
       const batch = stage1Indices.slice(i, i + CONCURRENCY);
-      await Promise.all(batch.map(idx => loadSingleFrame(idx)));
+      await Promise.all(batch.map((idx) => loadSingleFrame(idx)));
       loadedStage1 += batch.length;
 
-      const pct = Math.min(100, Math.round((loadedStage1 / stage1Indices.length) * 100));
-      if (loaderBarFill) loaderBarFill.style.width = `${ Math.max(15, pct) }%`;
-      if (loaderPercent) loaderPercent.textContent = `Cargando invitación... ${ pct }%`;
+      const pct = Math.min(100, Math.round((loadedStage1 / Math.max(1, stage1Indices.length)) * 100));
+      if (loaderBarFill) loaderBarFill.style.width = `${Math.max(15, pct)}%`;
+      if (loaderPercent) loaderPercent.textContent = `Cargando invitación… ${pct}%`;
     }
 
     loaderScreen.classList.add('hidden');
-    drawFrameForProgress(smoothProgress, true);
+    drawFrame(Math.round(currentFrame), true);
 
+    // Stage 2: Load remaining intermediate frames silently in background for 100% silky playback
     const remainingIndices = [];
-    for (let i = 0; i < TOTAL_FRAMES; i++) {
+    for (let i = 0; i <= 600; i++) {
       if (!frames[i]) remainingIndices.push(i);
     }
 
     for (let i = 0; i < remainingIndices.length; i += 16) {
       const batch = remainingIndices.slice(i, i + 16);
-      await Promise.all(batch.map(idx => loadSingleFrame(idx)));
-      const targetIdx = Math.round(smoothProgress * (TOTAL_FRAMES - 1));
-      if (batch.includes(targetIdx)) {
-        drawFrameForProgress(smoothProgress, true);
+      await Promise.all(batch.map((idx) => loadSingleFrame(idx)));
+      const rounded = Math.round(currentFrame);
+      if (batch.includes(rounded)) {
+        drawFrame(rounded, true);
       }
     }
   }
@@ -116,25 +146,23 @@ document.addEventListener('DOMContentLoaded', () => {
   // 3. DRAW NATIVE 9:16 VERTICAL FRAME
   // ==========================================================================
   function getNearestLoadedFrame(targetIndex) {
-    if (frames[targetIndex]) return { img: frames[targetIndex], index: targetIndex };
+    const clamped = Math.max(0, Math.min(TOTAL_FRAMES - 1, targetIndex));
+    if (frames[clamped]) return { img: frames[clamped], index: clamped };
 
-    for (let offset = 1; offset <= 12; offset++) {
-      const prev = targetIndex - offset;
+    for (let offset = 1; offset <= 16; offset++) {
+      const prev = clamped - offset;
       if (prev >= 0 && frames[prev]) return { img: frames[prev], index: prev };
-      const next = targetIndex + offset;
+      const next = clamped + offset;
       if (next < TOTAL_FRAMES && frames[next]) return { img: frames[next], index: next };
     }
 
     return frames[0] ? { img: frames[0], index: 0 } : null;
   }
 
-  function drawFrameForProgress(progress, force = false) {
+  function drawFrame(targetIndex, force = false) {
     const cw = worldCanvas.width;
     const ch = worldCanvas.height;
     if (!cw || !ch) return;
-
-    const clamped = Math.max(0, Math.min(1, progress));
-    const targetIndex = Math.round(clamped * (TOTAL_FRAMES - 1));
 
     const found = getNearestLoadedFrame(targetIndex);
     if (!found || !found.img) return;
@@ -145,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const img = found.img;
     const sw = img.naturalWidth || 720;
     const sh = img.naturalHeight || 1280;
-    const frameAspect = sw / sh; // 9:16 (0.5625)
+    const frameAspect = sw / sh;
     const screenAspect = cw / ch;
 
     worldCtx.clearRect(0, 0, cw, ch);
@@ -153,7 +181,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let drawW, drawH, drawX, drawY;
 
     if (screenAspect <= 0.85) {
-      // Mobile / Portrait screen: fill the vertical viewport while keeping the horizontal width 100% uncropped
       drawW = cw;
       drawH = drawW / frameAspect;
       if (drawH < ch) {
@@ -163,7 +190,6 @@ document.addEventListener('DOMContentLoaded', () => {
       drawX = (cw - drawW) * 0.5;
       drawY = (ch - drawH) * 0.5;
     } else {
-      // Desktop / Landscape monitor: display full 9:16 vertical stage centered with soft cloud side-fade
       drawH = ch;
       drawW = drawH * frameAspect;
       drawX = (cw - drawW) * 0.5;
@@ -173,14 +199,14 @@ document.addEventListener('DOMContentLoaded', () => {
     worldCtx.save();
     worldCtx.drawImage(img, drawX, drawY, drawW, drawH);
 
-    // On wide desktop screens, softly feather the left and right edges of the 9:16 vertical video into the pastel clouds
+    // Soft side-feather on desktop screens into the pastel botanical cloud backdrop
     if (drawX > 4) {
       const fadeSide = drawW * 0.08;
       worldCtx.globalCompositeOperation = 'destination-in';
       const hMask = worldCtx.createLinearGradient(drawX, 0, drawX + drawW, 0);
       hMask.addColorStop(0, 'rgba(0, 0, 0, 0)');
       hMask.addColorStop(fadeSide / drawW, 'rgba(0, 0, 0, 1)');
-      hMask.addColorStop(1 - (fadeSide / drawW), 'rgba(0, 0, 0, 1)');
+      hMask.addColorStop(1 - fadeSide / drawW, 'rgba(0, 0, 0, 1)');
       hMask.addColorStop(1, 'rgba(0, 0, 0, 0)');
       worldCtx.fillStyle = hMask;
       worldCtx.fillRect(drawX, drawY, drawW, drawH);
@@ -190,53 +216,226 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ==========================================================================
-  // 4. SCROLL LOOP & INFO BLOCK ACTIVATION
+  // 4. CHAPTER OVERLAY & AUTO-PLAYBACK CONTROLLER
   // ==========================================================================
-  function getScrollFraction() {
-    const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-    return Math.max(0, Math.min(1, window.scrollY / maxScroll));
+  function setActiveChapter(stopIndex) {
+    chapterGroups.forEach((group) => {
+      const idx = parseInt(group.dataset.stop || '-1', 10);
+      const isActive = idx === stopIndex;
+      group.classList.toggle('active', isActive);
+      group.setAttribute('aria-hidden', String(!isActive));
+    });
+
+    if (stageViewport) {
+      stageViewport.classList.toggle('is-last-stop', stopIndex === CHAPTER_STOPS.length - 1);
+    }
+
+    if (navPrevBtn) navPrevBtn.disabled = stopIndex <= 0;
+    if (navNextBtn) navNextBtn.disabled = stopIndex >= CHAPTER_STOPS.length - 1;
+
+    if (chapterAnnouncer && stopIndex >= 0 && CHAPTER_LABELS[stopIndex]) {
+      chapterAnnouncer.textContent = CHAPTER_LABELS[stopIndex];
+    }
   }
 
-  window.addEventListener('scroll', () => {
-    targetProgress = getScrollFraction();
-  }, { passive: true });
-
-  let lastUiProgress = -1;
-
-  function updateUIForProgress(p) {
-    if (Math.abs(p - lastUiProgress) < 0.0005) return;
-    lastUiProgress = p;
-
-    infoBlocks.forEach(block => {
-      const start = parseFloat(block.dataset.start || '0');
-      const end = parseFloat(block.dataset.end || '1');
-      if (p >= start && p <= end) {
-        block.classList.add('active');
-      } else {
-        block.classList.remove('active');
-      }
+  function clearActiveChapters() {
+    chapterGroups.forEach((group) => {
+      group.classList.remove('active');
+      group.setAttribute('aria-hidden', 'true');
     });
   }
 
-  function masterAnimationLoop() {
-    targetProgress = getScrollFraction();
-    const delta = targetProgress - smoothProgress;
+  function goToStop(nextIndex) {
+    const clamped = Math.max(0, Math.min(CHAPTER_STOPS.length - 1, nextIndex));
+    const targetFrame = CHAPTER_STOPS[clamped];
 
-    if (Math.abs(delta) > 0.0001) {
-      smoothProgress += delta * 0.16;
-      drawFrameForProgress(smoothProgress, false);
-      updateUIForProgress(smoothProgress);
-    } else if (smoothProgress !== targetProgress) {
-      smoothProgress = targetProgress;
-      drawFrameForProgress(smoothProgress, false);
-      updateUIForProgress(smoothProgress);
+    if (clamped === targetStopIndex && Math.abs(currentFrame - targetFrame) < 0.5) {
+      return;
     }
 
-    requestAnimationFrame(masterAnimationLoop);
+    targetStopIndex = clamped;
+
+    // Update nav rail immediately so user gets instant visual feedback
+    if (navPrevBtn) navPrevBtn.disabled = clamped <= 0;
+    if (navNextBtn) navNextBtn.disabled = clamped >= CHAPTER_STOPS.length - 1;
+
+    // Honor reduced motion preference
+    if (prefersReducedMotion.matches) {
+      isPlaying = false;
+      currentStopIndex = clamped;
+      currentFrame = targetFrame;
+      drawFrame(targetFrame, true);
+      setActiveChapter(clamped);
+      return;
+    }
+
+    // Fade out overlays during video transition
+    clearActiveChapters();
+    isPlaying = true;
+    lastFrameTimestamp = performance.now();
+  }
+
+  function advanceChapter(direction) {
+    const now = performance.now();
+    if (now - lastTriggerTime < 320) return;
+    lastTriggerTime = now;
+
+    const nextIndex = targetStopIndex + direction;
+    if (nextIndex < 0 || nextIndex >= CHAPTER_STOPS.length) return;
+    goToStop(nextIndex);
+  }
+
+  function playbackLoop(timestamp) {
+    if (isPlaying) {
+      const dt = Math.min(0.05, Math.max(0.001, (timestamp - lastFrameTimestamp) / 1000));
+      lastFrameTimestamp = timestamp;
+
+      const targetFrame = CHAPTER_STOPS[targetStopIndex];
+      const diff = targetFrame - currentFrame;
+      const distance = Math.abs(diff);
+
+      if (distance <= 0.35) {
+        currentFrame = targetFrame;
+        currentStopIndex = targetStopIndex;
+        isPlaying = false;
+        drawFrame(targetFrame, false);
+        setActiveChapter(targetStopIndex);
+      } else {
+        // Smooth cinematic playback: ~28 fps cruising speed with gentle ease-out near the stop
+        const cruisingFps = 28;
+        const easeWindow = 18;
+        const speedFactor = distance < easeWindow ? Math.max(0.32, distance / easeWindow) : 1;
+        const step = Math.sign(diff) * Math.min(distance, cruisingFps * speedFactor * dt);
+
+        currentFrame += step;
+        drawFrame(Math.round(currentFrame), false);
+
+        // Reveal the destination card slightly early as it settles into the stop
+        if (distance <= 4) {
+          setActiveChapter(targetStopIndex);
+        }
+      }
+    }
+
+    requestAnimationFrame(playbackLoop);
   }
 
   // ==========================================================================
-  // 5. COUNTDOWN TIMER (Viernes 12 de Marzo de 2027, 10:50 hs UTC-3)
+  // 5. INTERACTION TRIGGERS (WHEEL, TOUCH SWIPE, TAP, KEYBOARD, NAV BUTTONS)
+  // ==========================================================================
+  function isInteractiveTarget(target) {
+    if (!target || !target.closest) return false;
+    return Boolean(
+      target.closest('a, button, input, select, textarea, label, form, .chapter-rail')
+    );
+  }
+
+  // Mouse wheel / Trackpad small scroll
+  window.addEventListener(
+    'wheel',
+    (e) => {
+      if (isInteractiveTarget(e.target) && e.target.closest('select, textarea')) return;
+      e.preventDefault();
+      if (Math.abs(e.deltaY) < 16) return;
+      advanceChapter(e.deltaY > 0 ? 1 : -1);
+    },
+    { passive: false }
+  );
+
+  // Touch swipe & tap on mobile
+  let touchStartY = 0;
+  let touchStartX = 0;
+  let touchStartTime = 0;
+  let touchStartedInteractive = false;
+
+  stageViewport.addEventListener(
+    'touchstart',
+    (e) => {
+      if (e.touches.length !== 1) return;
+      touchStartedInteractive = isInteractiveTarget(e.target);
+      touchStartY = e.touches[0].clientY;
+      touchStartX = e.touches[0].clientX;
+      touchStartTime = performance.now();
+    },
+    { passive: true }
+  );
+
+  stageViewport.addEventListener(
+    'touchend',
+    (e) => {
+      if (touchStartedInteractive || e.changedTouches.length !== 1) return;
+      lastTouchEndTime = performance.now();
+
+      const dy = touchStartY - e.changedTouches[0].clientY;
+      const dx = touchStartX - e.changedTouches[0].clientX;
+      const elapsed = lastTouchEndTime - touchStartTime;
+
+      // Short vertical swipe
+      if (Math.abs(dy) >= 26 && Math.abs(dy) > Math.abs(dx)) {
+        advanceChapter(dy > 0 ? 1 : -1);
+        return;
+      }
+
+      // Clean tap on screen → play to next stop
+      if (Math.abs(dy) < 12 && Math.abs(dx) < 12 && elapsed < 350) {
+        if (targetStopIndex < CHAPTER_STOPS.length - 1) {
+          advanceChapter(1);
+        }
+      }
+    },
+    { passive: true }
+  );
+
+  // Mouse click on desktop stage → play to next stop
+  stageViewport.addEventListener('click', (e) => {
+    // Ignore synthetic click immediately following touch
+    if (performance.now() - lastTouchEndTime < 450) return;
+    if (isInteractiveTarget(e.target)) return;
+    if (targetStopIndex < CHAPTER_STOPS.length - 1) {
+      advanceChapter(1);
+    }
+  });
+
+  // Explicit prompt & rail buttons
+  document.querySelectorAll('[data-action="next"]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      advanceChapter(1);
+    });
+  });
+
+  if (navPrevBtn) {
+    navPrevBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      advanceChapter(-1);
+    });
+  }
+
+  if (navNextBtn) {
+    navNextBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      advanceChapter(1);
+    });
+  }
+
+  // Keyboard navigation (A11Y)
+  window.addEventListener('keydown', (e) => {
+    const activeTag = document.activeElement?.tagName;
+    if (activeTag === 'INPUT' || activeTag === 'SELECT' || activeTag === 'TEXTAREA') {
+      return;
+    }
+
+    if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === 'ArrowRight' || e.key === ' ') {
+      e.preventDefault();
+      advanceChapter(1);
+    } else if (e.key === 'ArrowUp' || e.key === 'PageUp' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      advanceChapter(-1);
+    }
+  });
+
+  // ==========================================================================
+  // 6. COUNTDOWN TIMER (Viernes 12 de Marzo de 2027, 10:50 hs UTC-3)
   // ==========================================================================
   const targetWeddingDate = new Date('2027-03-12T10:50:00-03:00').getTime();
 
@@ -264,51 +463,61 @@ document.addEventListener('DOMContentLoaded', () => {
   setInterval(updateCountdown, 1000);
 
   // ==========================================================================
-  // 6. COPY ALIAS & WHATSAPP RSVP
+  // 7. COPY ALIAS & WHATSAPP RSVP
   // ==========================================================================
+  let toastTimeoutId = null;
+
   function showToast(msg) {
     if (!toastNotice || !toastMessage) return;
     toastMessage.textContent = msg;
     toastNotice.classList.add('show');
-    setTimeout(() => {
+    if (toastTimeoutId) clearTimeout(toastTimeoutId);
+    toastTimeoutId = setTimeout(() => {
       toastNotice.classList.remove('show');
     }, 2800);
   }
 
   if (copyAliasBtn) {
-    copyAliasBtn.addEventListener('click', () => {
+    copyAliasBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
       const alias = document.getElementById('bank-alias')?.textContent.trim() || 'BODA.FEDE.Y.LARA';
-      navigator.clipboard.writeText(alias).then(() => {
-        showToast('Alias copiado');
-      }).catch(() => {
-        showToast(`Alias: ${ alias }`);
-      });
+      navigator.clipboard
+        .writeText(alias)
+        .then(() => showToast('Alias copiado'))
+        .catch(() => showToast(`Alias: ${alias}`));
     });
   }
 
   if (rsvpForm) {
     rsvpForm.addEventListener('submit', (e) => {
       e.preventDefault();
-      const name = document.getElementById('guest-name')?.value.trim();
+      const nameInput = document.getElementById('guest-name');
+      const name = nameInput?.value.trim();
       const eventChoice = document.getElementById('guest-event')?.value;
 
       if (!name) {
         showToast('Ingresá tu nombre y apellido');
+        nameInput?.focus();
         return;
       }
 
-      let text = `Hola Lara y Fede,\n\n`;
-      text += `Confirmo mi asistencia a su casamiento:\n`;
-      text += `• Nombre: ${ name }\n`;
-      text += `• Asistencia: ${ eventChoice }\n\n`;
-      text += `Muchas felicidades.`;
+      const text = [
+        'Hola Lara y Fede,',
+        '',
+        'Confirmo mi asistencia a su casamiento:',
+        `• Nombre: ${name}`,
+        `• Asistencia: ${eventChoice}`,
+        '',
+        'Muchas felicidades.'
+      ].join('\n');
 
-      const url = `https://api.whatsapp.com/send?text=${ encodeURIComponent(text) }`;
-      window.open(url, '_blank');
+      const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+      window.open(url, '_blank', 'noopener,noreferrer');
     });
   }
 
+  // Initialize
+  setActiveChapter(0);
   preloadFrameSequence();
-  updateUIForProgress(0);
-  requestAnimationFrame(masterAnimationLoop);
+  requestAnimationFrame(playbackLoop);
 });

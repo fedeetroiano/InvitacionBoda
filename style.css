@@ -1,40 +1,78 @@
 /* ==========================================================================
-   LARA & FEDERICO — EDITORIAL BOTANICAL CLOUD WEDDING INVITATION
-   Palette: Pastel Clouds (#f6f4ee), Watercolor Eucalyptus & Deep Forest Green (#1c3526)
-   No gold, no card borders, no emojis, compact editorial typography
+   LARA & FEDERICO — EDITORIAL BOTANICAL CHAPTER INVITATION
+   System: DESIGN.md (taste-skill + web-design-guidelines + awesome-design-md)
+   Palette: Cotton Alabaster (#f6f4ee) & Deep Forest Green (#1c3526)
+   Zero hard borders, zero gold, zero emojis, A11Y & reduced-motion compliant
    ========================================================================== */
 
 :root {
-  --cloud-bg: #f6f4ee;
-  --cloud-soft: rgba(246, 244, 238, 0.92);
-  --green-dark: #1c3526;
-  --green-mid: #2c4c39;
-  --green-muted: #4b6856;
-  --green-pale: #dce5dd;
+  --surface-paper: #f6f4ee;
+  --surface-veil-light: rgba(246, 244, 238, 0.88);
+  --surface-veil-dark: rgba(17, 33, 24, 0.82);
+
+  --ink-primary: #1c3526;
+  --ink-secondary: #2c4c39;
+  --ink-muted: #4b6856;
+  --ink-on-dark: #f6f4ee;
+  --ink-on-dark-muted: rgba(246, 244, 238, 0.78);
+
+  --tint-subtle: rgba(28, 53, 38, 0.08);
+  --tint-subtle-hover: rgba(28, 53, 38, 0.14);
+  --tint-subtle-dark: rgba(246, 244, 238, 0.12);
+  --tint-subtle-dark-hover: rgba(246, 244, 238, 0.2);
+
+  --shadow-editorial: 0 12px 32px rgba(15, 29, 21, 0.08);
+  --shadow-editorial-dark: 0 16px 36px rgba(0, 0, 0, 0.32);
 
   --font-serif: 'Cormorant Garamond', Georgia, serif;
-  --font-sans: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
   -webkit-tap-highlight-color: transparent;
 }
 
-html {
+html,
+body {
+  height: 100%;
+  overflow: hidden;
   font-size: 16px;
-  background-color: var(--cloud-bg);
-  overscroll-behavior-y: none;
+  font-family: var(--font-sans);
+  color: var(--ink-primary);
+  background-color: var(--surface-paper);
+  overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-body {
-  font-family: var(--font-sans);
-  color: var(--green-dark);
-  background-color: var(--cloud-bg);
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
+/* Visually hidden helper for screen readers */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Accessible focus ring for keyboard users */
+:focus-visible {
+  outline: 2px solid var(--ink-primary);
+  outline-offset: 2px;
+}
+
+[data-theme="dark"] :focus-visible {
+  outline-color: var(--ink-on-dark);
 }
 
 /* ==========================================================================
@@ -47,11 +85,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--cloud-bg);
+  background-color: var(--surface-paper);
   background-image: url('assets/pastel_botanical_clouds.jpg');
   background-size: cover;
   background-position: center;
-  transition: opacity 0.65s ease, visibility 0.65s ease;
+  transition: opacity 0.6s var(--ease-out-expo), visibility 0.6s;
 }
 
 .loader-screen.hidden {
@@ -71,38 +109,39 @@ body {
   width: 96px;
   height: 96px;
   object-fit: contain;
-  margin-bottom: 1.2rem;
+  margin-bottom: 1.25rem;
 }
 
 .loader-bar-track {
   width: 100%;
-  height: 3px;
+  height: 2px;
   background: rgba(28, 53, 38, 0.14);
   border-radius: 999px;
   overflow: hidden;
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.7rem;
 }
 
 .loader-bar-fill {
   height: 100%;
-  width: 15%;
-  background: var(--green-dark);
+  width: 12%;
+  background: var(--ink-primary);
   border-radius: 999px;
   transition: width 0.25s ease;
 }
 
 .loader-percent {
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 500;
-  color: var(--green-muted);
-  letter-spacing: 0.1em;
+  color: var(--ink-muted);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ==========================================================================
-   2. FIXED VIEWPORT & BOTANICAL CLOUD BACKGROUND
+   2. FIXED INTERACTIVE CHAPTER STAGE
    ========================================================================== */
-.scroll-world-viewport {
+.stage-viewport {
   position: fixed;
   inset: 0;
   width: 100vw;
@@ -110,13 +149,19 @@ body {
   height: 100dvh;
   overflow: hidden;
   z-index: 1;
-  background-color: var(--cloud-bg);
+  background-color: var(--surface-paper);
+  touch-action: none;
+  cursor: pointer;
+}
+
+.stage-viewport.is-last-stop {
+  cursor: default;
 }
 
 .botanical-cloud-bg {
   position: absolute;
   inset: 0;
-  background-color: var(--cloud-bg);
+  background-color: var(--surface-paper);
   background-image: url('assets/pastel_botanical_clouds.jpg');
   background-size: cover;
   background-position: center;
@@ -132,16 +177,8 @@ body {
   z-index: 2;
 }
 
-.scroll-track {
-  position: relative;
-  width: 100%;
-  height: 1350vh;
-  z-index: 0;
-  pointer-events: none;
-}
-
 /* ==========================================================================
-   3. BORDERLESS COMPACT EDITORIAL INFO BLOCKS (TOP & BOTTOM)
+   3. BORDERLESS EDITORIAL OVERLAY BLOCKS (TOP & BOTTOM)
    ========================================================================== */
 .story-cards-layer {
   position: fixed;
@@ -150,38 +187,68 @@ body {
   pointer-events: none;
 }
 
+.chapter-group {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
 .info-block {
   position: absolute;
   left: 50%;
-  width: min(88vw, 370px);
-  padding: 0.65rem 1rem;
+  width: min(88vw, 376px);
+  padding: 0.9rem 1.25rem;
   text-align: center;
   border: none;
-  border-radius: 28px;
-  /* Soft cloud mist halo behind text — zero hard borders */
-  background: radial-gradient(
-    ellipse at center,
-    rgba(246, 244, 238, 0.92) 0%,
-    rgba(246, 244, 238, 0.76) 58%,
-    rgba(246, 244, 238, 0) 100%
-  );
+  border-radius: 20px;
+  background: var(--surface-veil-light);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  backdrop-filter: blur(14px) saturate(1.1);
+  box-shadow: var(--shadow-editorial);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition: opacity 0.45s ease, transform 0.45s ease, visibility 0.45s;
+  transition: opacity 0.45s var(--ease-out-expo), transform 0.45s var(--ease-out-expo), visibility 0.45s;
+  will-change: opacity, transform;
+}
+
+/* Dark botanical veil for starry night chapter */
+.chapter-group[data-theme="dark"] .info-block {
+  background: var(--surface-veil-dark);
+  box-shadow: var(--shadow-editorial-dark);
+  color: var(--ink-on-dark);
+}
+
+.chapter-group[data-theme="dark"] .info-kicker,
+.chapter-group[data-theme="dark"] .info-subtext {
+  color: var(--ink-on-dark-muted);
+}
+
+.chapter-group[data-theme="dark"] .info-heading,
+.chapter-group[data-theme="dark"] .info-details {
+  color: var(--ink-on-dark);
 }
 
 .info-block.pos-top {
-  top: 7vh;
-  transform: translate3d(-50%, -8px, 0);
+  top: max(20px, calc(env(safe-area-inset-top) + 16px));
+  transform: translate3d(-50%, -10px, 0);
 }
 
 .info-block.pos-bottom {
-  bottom: 7vh;
-  transform: translate3d(-50%, 8px, 0);
+  bottom: max(22px, calc(env(safe-area-inset-bottom) + 18px));
+  transform: translate3d(-50%, 10px, 0);
 }
 
-.info-block.active {
+.info-block--prompt {
+  width: auto;
+  padding: 0;
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: none;
+}
+
+.chapter-group.active .info-block {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
@@ -191,212 +258,363 @@ body {
 /* Editorial Typography */
 .info-kicker {
   font-family: var(--font-sans);
-  font-size: 0.64rem;
+  font-size: 0.65rem;
   font-weight: 600;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--green-muted);
-  margin-bottom: 0.2rem;
+  color: var(--ink-muted);
+  margin-bottom: 0.25rem;
 }
 
 .info-heading {
   font-family: var(--font-serif);
   font-size: 1.55rem;
   font-weight: 600;
-  color: var(--green-dark);
-  line-height: 1.15;
-  margin-bottom: 0.2rem;
+  color: var(--ink-primary);
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  margin-bottom: 0.28rem;
+}
+
+.info-heading--hero {
+  font-size: 1.95rem;
+  margin-bottom: 0;
 }
 
 .info-details {
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 500;
-  color: var(--green-dark);
+  color: var(--ink-primary);
   line-height: 1.45;
+  font-variant-numeric: tabular-nums;
+  text-wrap: pretty;
 }
 
 .info-subtext {
-  font-size: 0.75rem;
+  font-size: 0.76rem;
   font-weight: 400;
-  color: var(--green-muted);
+  color: var(--ink-muted);
   line-height: 1.45;
+  text-wrap: pretty;
 }
 
-/* Clean Minimal Countdown */
+.info-subtext--spaced {
+  margin-bottom: 0.55rem;
+}
+
+/* Opening Prompt Pill */
+.prompt-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 999px;
+  background: var(--surface-veil-light);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  box-shadow: var(--shadow-editorial);
+  color: var(--ink-primary);
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.prompt-trigger:hover {
+  background: var(--surface-paper);
+  transform: translateY(-1px);
+}
+
+.prompt-chevron {
+  animation: gentle-bob 2.2s ease-in-out infinite;
+}
+
+@keyframes gentle-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(3px); }
+}
+
+/* ==========================================================================
+   4. COUNTDOWN (TABULAR NUMS)
+   ========================================================================== */
 .countdown-clean {
   display: inline-flex;
   align-items: baseline;
   justify-content: center;
-  gap: 10px;
+  gap: 12px;
+  font-variant-numeric: tabular-nums;
 }
 
 .cd-unit {
   display: flex;
   flex-direction: column;
   align-items: center;
+  min-width: 42px;
 }
 
 .cd-val {
   font-family: var(--font-serif);
-  font-size: 1.35rem;
+  font-size: 1.5rem;
   font-weight: 600;
-  color: var(--green-dark);
+  color: var(--ink-primary);
   line-height: 1;
 }
 
 .cd-txt {
-  font-size: 0.58rem;
+  font-size: 0.6rem;
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--green-muted);
-  margin-top: 2px;
+  color: var(--ink-muted);
+  margin-top: 4px;
 }
 
 .cd-sep {
   font-family: var(--font-serif);
-  font-size: 1.1rem;
-  color: var(--green-muted);
+  font-size: 1.15rem;
+  color: var(--ink-muted);
 }
 
-/* Clean Buttons (Dark Forest Green, no gold) */
+/* ==========================================================================
+   5. BUTTONS & ACTIONS (A11Y 44px TOUCH TARGETS)
+   ========================================================================== */
 .info-actions {
-  display: inline-flex;
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  margin-top: 0.25rem;
 }
 
-.btn-green,
-.btn-ghost {
+.btn-primary,
+.btn-secondary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 7px 15px;
+  min-height: 40px;
+  padding: 9px 18px;
   border-radius: 999px;
   font-family: var(--font-sans);
-  font-size: 0.72rem;
+  font-size: 0.76rem;
   font-weight: 500;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
   text-decoration: none;
   cursor: pointer;
-  transition: all 0.2s ease;
   border: none;
+  touch-action: manipulation;
+  transition: background-color 0.2s ease, transform 0.15s ease;
 }
 
-.btn-green {
-  background-color: var(--green-dark);
-  color: var(--cloud-bg);
+.btn-primary {
+  background-color: var(--ink-primary);
+  color: var(--surface-paper);
 }
 
-.btn-green:hover {
-  background-color: var(--green-mid);
+.btn-primary:hover {
+  background-color: var(--ink-secondary);
 }
 
-.btn-ghost {
-  background-color: rgba(28, 53, 38, 0.08);
-  color: var(--green-dark);
+.btn-primary:active,
+.btn-secondary:active {
+  transform: scale(0.98);
 }
 
-.btn-ghost:hover {
-  background-color: rgba(28, 53, 38, 0.15);
+.btn-secondary {
+  background-color: var(--tint-subtle);
+  color: var(--ink-primary);
 }
 
-.btn-xs {
-  padding: 5px 11px;
-  font-size: 0.68rem;
+.btn-secondary:hover {
+  background-color: var(--tint-subtle-hover);
+}
+
+.chapter-group[data-theme="dark"] .btn-primary {
+  background-color: var(--surface-paper);
+  color: var(--ink-primary);
+}
+
+.chapter-group[data-theme="dark"] .btn-primary:hover {
+  background-color: #ebe7dc;
+}
+
+.btn-sm {
+  min-height: 36px;
+  padding: 7px 14px;
+  font-size: 0.72rem;
 }
 
 .btn-wide {
   width: 100%;
-  margin-top: 6px;
+  min-height: 44px;
+  margin-top: 4px;
 }
 
 /* Alias Row */
 .alias-clean-row {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 0.3rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 0.45rem;
 }
 
 .alias-code {
   font-family: var(--font-sans);
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   font-weight: 600;
-  letter-spacing: 0.05em;
-  color: var(--green-dark);
+  letter-spacing: 0.06em;
+  color: var(--ink-primary);
+  user-select: all;
 }
 
-/* Minimal RSVP Form */
+/* ==========================================================================
+   6. MINIMAL RSVP FORM (DARK BOTANICAL THEME)
+   ========================================================================== */
 .rsvp-clean-form {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  max-width: 310px;
+  gap: 8px;
+  max-width: 320px;
   margin: 0 auto;
 }
 
 .rsvp-clean-inputs {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 8px;
 }
 
 .clean-input,
 .clean-select {
   width: 100%;
-  padding: 6px 11px;
-  border-radius: 999px;
+  min-height: 42px;
+  padding: 9px 14px;
+  border-radius: 12px;
   border: none;
-  background: rgba(28, 53, 38, 0.07);
+  background: var(--tint-subtle-dark);
   font-family: var(--font-sans);
-  font-size: 0.73rem;
-  color: var(--green-dark);
+  font-size: 0.82rem;
+  color: var(--ink-on-dark);
   text-align: center;
   outline: none;
+  transition: background-color 0.2s ease;
+}
+
+.clean-select option {
+  background-color: #162a1e;
+  color: var(--ink-on-dark);
 }
 
 .clean-input::placeholder {
-  color: var(--green-muted);
+  color: var(--ink-on-dark-muted);
 }
 
 .clean-input:focus,
 .clean-select:focus {
-  background: rgba(28, 53, 38, 0.11);
+  background: var(--tint-subtle-dark-hover);
 }
 
-/* Toast */
+/* ==========================================================================
+   7. DISCREET VERTICAL CHAPTER NAVIGATION RAIL
+   ========================================================================== */
+.chapter-rail {
+  position: fixed;
+  right: max(12px, env(safe-area-inset-right));
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+.rail-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(246, 244, 238, 0.78);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  color: var(--ink-primary);
+  box-shadow: 0 4px 16px rgba(15, 29, 21, 0.1);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: opacity 0.25s ease, transform 0.15s ease, background-color 0.2s ease;
+}
+
+.rail-btn:hover:not(:disabled) {
+  background: var(--surface-paper);
+  transform: scale(1.05);
+}
+
+.rail-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.rail-btn:disabled {
+  opacity: 0.22;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   8. TOAST NOTIFICATION
+   ========================================================================== */
 .toast-notice {
   position: fixed;
-  bottom: 24px;
+  bottom: max(26px, calc(env(safe-area-inset-bottom) + 18px));
   left: 50%;
-  transform: translateX(-50%) translateY(15px);
+  transform: translate3d(-50%, 14px, 0);
   z-index: 9000;
-  padding: 7px 16px;
+  padding: 9px 18px;
   border-radius: 999px;
-  background: var(--green-dark);
-  color: var(--cloud-bg);
-  font-size: 0.74rem;
+  background: var(--ink-primary);
+  color: var(--surface-paper);
+  font-size: 0.76rem;
   font-weight: 500;
+  box-shadow: 0 10px 24px rgba(15, 29, 21, 0.2);
   opacity: 0;
   visibility: hidden;
-  transition: all 0.28s ease;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s var(--ease-out-expo), visibility 0.25s;
 }
 
 .toast-notice.show {
   opacity: 1;
   visibility: visible;
-  transform: translateX(-50%) translateY(0);
+  transform: translate3d(-50%, 0, 0);
 }
 
-/* Desktop fine-tuning */
+/* ==========================================================================
+   9. DESKTOP & REDUCED MOTION
+   ========================================================================== */
 @media (min-width: 900px) {
-  .info-block.pos-top {
-    top: 22px;
+  .info-block {
+    width: min(88vw, 396px);
   }
-  .info-block.pos-bottom {
-    bottom: 22px;
+  .chapter-rail {
+    right: 28px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.15s !important;
   }
 }

@@ -2,20 +2,21 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Lara & Federico — Nuestra Boda</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Lara &amp; Federico — Nuestra Boda</title>
 
   <meta name="description" content="Invitación de casamiento de Lara y Federico. 12 y 13 de Marzo de 2027.">
-  <meta property="og:title" content="Lara & Federico — Nuestra Boda">
-  <meta property="og:description" content="Deslizá para recorrer nuestra invitación.">
+  <meta property="og:title" content="Lara &amp; Federico — Nuestra Boda">
+  <meta property="og:description" content="Tocá o deslizá para recorrer nuestra invitación.">
   <meta property="og:type" content="website">
+  <meta name="theme-color" content="#1c3526">
 
   <link rel="icon" href="assets/logo_lf.png" type="image/png">
 
-  <!-- Google Fonts -->
+  <!-- Editorial Typography Pairing: Cormorant Garamond + Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="style.css">
 </head>
@@ -24,169 +25,199 @@
   <!-- ========================================================================
        LOADING SCREEN
        ======================================================================== -->
-  <div id="loader-screen" class="loader-screen">
+  <div id="loader-screen" class="loader-screen" role="status" aria-live="polite">
     <div class="loader-content">
-      <img src="assets/logo_lf.png" alt="L&F 13-03-27" class="loader-logo-img">
-      <div class="loader-bar-track">
+      <img src="assets/logo_lf.png" alt="Monograma Lara y Federico 13-03-27" class="loader-logo-img" width="96" height="96">
+      <div class="loader-bar-track" aria-hidden="true">
         <div id="loader-bar-fill" class="loader-bar-fill"></div>
       </div>
-      <span id="loader-percent" class="loader-percent">Cargando invitación...</span>
+      <span id="loader-percent" class="loader-percent">Cargando invitación…</span>
     </div>
   </div>
 
   <!-- ========================================================================
-       FIXED VIEWPORT: PASTEL BOTANICAL CLOUDS + CENTERED VIDEO + COMPACT TEXTS
+       INTERACTIVE CHAPTER STAGE (FIXED 100dvh VIEWPORT)
        ======================================================================== -->
-  <div class="scroll-world-viewport">
+  <main id="stage-viewport" class="stage-viewport" aria-label="Invitación interactiva de Lara y Federico">
 
-    <!-- Pastel Clouds & Botanical Plants Background -->
+    <!-- Pastel Botanical Clouds Backdrop (Desktop side ambiance) -->
     <div class="botanical-cloud-bg" aria-hidden="true"></div>
 
-    <!-- Primary Image-Sequence Scrubbing Canvas -->
-    <canvas id="scroll-world-canvas"></canvas>
+    <!-- Native 9:16 Sequence Canvas -->
+    <canvas id="scroll-world-canvas" aria-hidden="true"></canvas>
+
+    <!-- Screen-reader live region for chapter changes -->
+    <div id="chapter-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 
     <!-- ======================================================================
-         COMPACT BORDERLESS INFO BLOCKS (TOP & BOTTOM OF VIDEO)
+         CHAPTER OVERLAYS (ALIGNED TO STOPS: 0, 110, 262, 414, 544, 600)
          ====================================================================== -->
     <div class="story-cards-layer">
 
-      <!-- ESCENA 1: EL SOBRE (0.00 - 0.08) -->
-      <article class="info-block pos-top" data-start="0.00" data-end="0.08">
-        <p class="info-kicker">Nuestra Boda</p>
-        <h1 class="info-heading">Lara & Federico</h1>
-      </article>
+      <!-- PARADA 0 (FRAME 0): EL SOBRE -->
+      <section class="chapter-group active" data-stop="0" data-theme="light" aria-label="Portada">
+        <header class="info-block pos-top">
+          <p class="info-kicker">Nuestra Boda</p>
+          <h1 class="info-heading info-heading--hero">Lara &amp; Federico</h1>
+        </header>
 
-      <article class="info-block pos-bottom" data-start="0.00" data-end="0.08">
-        <p class="info-subtext">Deslizá suavemente hacia abajo para abrir la invitación</p>
-      </article>
+        <div class="info-block pos-bottom info-block--prompt">
+          <button type="button" class="prompt-trigger" data-action="next" aria-label="Abrir la invitación">
+            <span class="prompt-text">Tocá o deslizá para abrir</span>
+            <svg class="prompt-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M3.5 6L8 10.5L12.5 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      </section>
 
-      <!-- ESCENA 2: LA TORTA (0.09 - 0.26) -->
-      <article class="info-block pos-top" data-start="0.09" data-end="0.26">
-        <p class="info-kicker">Nos Casamos</p>
-        <h2 class="info-heading">12 & 13 de Marzo, 2027</h2>
-        <p class="info-subtext">Queremos compartir este día tan importante con vos</p>
-      </article>
+      <!-- PARADA 1 (FRAME 110): LA TORTA / NOS CASAMOS -->
+      <section class="chapter-group" data-stop="1" data-theme="light" aria-label="Fecha y cuenta regresiva" aria-hidden="true">
+        <div class="info-block pos-top">
+          <p class="info-kicker">Nos Casamos</p>
+          <h2 class="info-heading">12 &amp; 13 de Marzo, 2027</h2>
+          <p class="info-subtext">Queremos compartir este día tan importante con vos</p>
+        </div>
 
-      <article class="info-block pos-bottom" data-start="0.09" data-end="0.26">
-        <div class="countdown-clean">
-          <div class="cd-unit">
-            <span id="cd-days" class="cd-val">000</span>
-            <span class="cd-txt">Días</span>
-          </div>
-          <span class="cd-sep">·</span>
-          <div class="cd-unit">
-            <span id="cd-hours" class="cd-val">00</span>
-            <span class="cd-txt">Horas</span>
-          </div>
-          <span class="cd-sep">·</span>
-          <div class="cd-unit">
-            <span id="cd-mins" class="cd-val">00</span>
-            <span class="cd-txt">Min</span>
-          </div>
-          <span class="cd-sep">·</span>
-          <div class="cd-unit">
-            <span id="cd-secs" class="cd-val">00</span>
-            <span class="cd-txt">Seg</span>
+        <div class="info-block pos-bottom">
+          <div class="countdown-clean" aria-label="Cuenta regresiva para la boda">
+            <div class="cd-unit">
+              <span id="cd-days" class="cd-val">000</span>
+              <span class="cd-txt">Días</span>
+            </div>
+            <span class="cd-sep" aria-hidden="true">·</span>
+            <div class="cd-unit">
+              <span id="cd-hours" class="cd-val">00</span>
+              <span class="cd-txt">Horas</span>
+            </div>
+            <span class="cd-sep" aria-hidden="true">·</span>
+            <div class="cd-unit">
+              <span id="cd-mins" class="cd-val">00</span>
+              <span class="cd-txt">Min</span>
+            </div>
+            <span class="cd-sep" aria-hidden="true">·</span>
+            <div class="cd-unit">
+              <span id="cd-secs" class="cd-val">00</span>
+              <span class="cd-txt">Seg</span>
+            </div>
           </div>
         </div>
-      </article>
+      </section>
 
-      <!-- ESCENA 3: REGISTRO CIVIL (0.27 - 0.45) -->
-      <article class="info-block pos-top" data-start="0.27" data-end="0.45">
-        <p class="info-kicker">Ceremonia Civil</p>
-        <h2 class="info-heading">Registro Civil</h2>
-        <p class="info-details">Viernes 12 de Marzo de 2027 · 10:50 hs</p>
-        <p class="info-details">Acha y Elcano</p>
-      </article>
-
-      <article class="info-block pos-bottom" data-start="0.27" data-end="0.45">
-        <div class="info-actions">
-          <a href="https://www.google.com/maps/search/?api=1&query=Acha+y+Elcano" target="_blank" rel="noopener noreferrer" class="btn-green">
-            Cómo llegar
-          </a>
-          <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Civil+Lara+y+Federico&dates=20270312T135000Z/20270312T153000Z&location=Acha+y+Elcano" target="_blank" rel="noopener noreferrer" class="btn-ghost">
-            Agendar fecha
-          </a>
+      <!-- PARADA 2 (FRAME 262): REGISTRO CIVIL -->
+      <section class="chapter-group" data-stop="2" data-theme="light" aria-label="Ceremonia Civil" aria-hidden="true">
+        <div class="info-block pos-top">
+          <p class="info-kicker">Ceremonia Civil</p>
+          <h2 class="info-heading">Registro Civil</h2>
+          <p class="info-details">Viernes 12 de Marzo de 2027 · 10:50 hs</p>
+          <p class="info-subtext">Acha y Elcano</p>
         </div>
-      </article>
 
-      <!-- ESCENA 4: SALÓN DEL REINO EXTERIOR (0.46 - 0.55) -->
-      <article class="info-block pos-top" data-start="0.46" data-end="0.55">
-        <p class="info-kicker">Ceremonia</p>
-        <h2 class="info-heading">Salón del Reino de los Testigos de Jehová</h2>
-        <p class="info-details">Sábado 13 de Marzo de 2027 · 13:30 hs</p>
-        <p class="info-details">Monseñor Rau 1758</p>
-      </article>
-
-      <article class="info-block pos-bottom" data-start="0.46" data-end="0.55">
-        <div class="info-actions">
-          <a href="https://www.google.com/maps/search/?api=1&query=Monse%C3%B1or+Rau+1758" target="_blank" rel="noopener noreferrer" class="btn-green">
-            Ver ubicación
-          </a>
-          <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Ceremonia+Lara+y+Federico&dates=20270313T163000Z/20270313T180000Z&location=Monse%C3%B1or+Rau+1758" target="_blank" rel="noopener noreferrer" class="btn-ghost">
-            Agendar fecha
-          </a>
-        </div>
-      </article>
-
-      <!-- ESCENA 5: INTERIOR DEL SALÓN (0.56 - 0.69) -->
-      <article class="info-block pos-top" data-start="0.56" data-end="0.69">
-        <p class="info-kicker">Horarios</p>
-        <h2 class="info-heading">Monseñor Rau 1758</h2>
-        <p class="info-subtext">Se ruega puntualidad · Ingreso sugerido 13:15 hs</p>
-      </article>
-
-      <article class="info-block pos-bottom" data-start="0.56" data-end="0.69">
-        <p class="info-kicker">Código de Vestimenta</p>
-        <p class="info-details">Elegante / Formal</p>
-        <p class="info-subtext">El color blanco queda reservado para la novia</p>
-      </article>
-
-      <!-- ESCENA 6: SALIDA RECIÉN CASADOS (0.70 - 0.88) -->
-      <article class="info-block pos-top" data-start="0.70" data-end="0.88">
-        <p class="info-kicker">Lara & Federico</p>
-        <h2 class="info-heading">Tu presencia es nuestro mejor regalo</h2>
-      </article>
-
-      <article class="info-block pos-bottom" data-start="0.70" data-end="0.88">
-        <p class="info-subtext">Si deseás hacernos un presente:</p>
-        <div class="alias-clean-row">
-          <span class="alias-code" id="bank-alias">BODA.FEDE.Y.LARA</span>
-          <button type="button" id="copy-alias-btn" class="btn-ghost btn-xs">Copiar alias</button>
-        </div>
-      </article>
-
-      <!-- ESCENA 7: RESUMEN & CONFIRMACIÓN (0.89 - 1.00) -->
-      <article class="info-block pos-top" data-start="0.89" data-end="1.00">
-        <p class="info-kicker">Resumen</p>
-        <p class="info-details"><strong>Civil:</strong> Viernes 12/03 · 10:50 hs · Acha y Elcano</p>
-        <p class="info-details"><strong>Salón del Reino:</strong> Sábado 13/03 · 13:30 hs · Monseñor Rau 1758</p>
-      </article>
-
-      <article class="info-block pos-bottom" data-start="0.89" data-end="1.00">
-        <form id="rsvp-form" class="rsvp-clean-form">
-          <div class="rsvp-clean-inputs">
-            <input type="text" id="guest-name" class="clean-input" placeholder="Nombre y apellido" required>
-            <select id="guest-event" class="clean-select">
-              <option value="Civil (12/03) y Salón del Reino (13/03)">Asistiré a ambos</option>
-              <option value="Salón del Reino (13/03 - 13:30 hs)">Asistiré al Salón del Reino</option>
-              <option value="Registro Civil (12/03 - 10:50 hs)">Asistiré al Civil</option>
-              <option value="No podré asistir">No podré asistir</option>
-            </select>
+        <div class="info-block pos-bottom">
+          <div class="info-actions">
+            <a href="https://www.google.com/maps/search/?api=1&query=Acha+y+Elcano" target="_blank" rel="noopener noreferrer" class="btn-primary">
+              Cómo llegar
+            </a>
+            <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Civil+Lara+y+Federico&dates=20270312T135000Z/20270312T153000Z&location=Acha+y+Elcano" target="_blank" rel="noopener noreferrer" class="btn-secondary">
+              Agendar fecha
+            </a>
           </div>
-          <button type="submit" class="btn-green btn-wide">Confirmar asistencia</button>
-        </form>
-      </article>
+        </div>
+      </section>
+
+      <!-- PARADA 3 (FRAME 414): SALÓN DEL REINO -->
+      <section class="chapter-group" data-stop="3" data-theme="light" aria-label="Ceremonia en el Salón del Reino" aria-hidden="true">
+        <div class="info-block pos-top">
+          <p class="info-kicker">Ceremonia</p>
+          <h2 class="info-heading">Salón del Reino de los Testigos de Jehová</h2>
+          <p class="info-details">Sábado 13 de Marzo de 2027 · 13:30 hs</p>
+          <p class="info-subtext">Monseñor Rau 1758 · Ingreso sugerido 13:15 hs</p>
+        </div>
+
+        <div class="info-block pos-bottom">
+          <p class="info-kicker">Vestimenta Elegante / Formal</p>
+          <p class="info-subtext info-subtext--spaced">El color blanco queda reservado para la novia</p>
+          <div class="info-actions">
+            <a href="https://www.google.com/maps/search/?api=1&query=Monse%C3%B1or+Rau+1758" target="_blank" rel="noopener noreferrer" class="btn-primary">
+              Ver ubicación
+            </a>
+            <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Ceremonia+Lara+y+Federico&dates=20270313T163000Z/20270313T180000Z&location=Monse%C3%B1or+Rau+1758" target="_blank" rel="noopener noreferrer" class="btn-secondary">
+              Agendar fecha
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- PARADA 4 (FRAME 544): SALIDA RECIÉN CASADOS / REGALO -->
+      <section class="chapter-group" data-stop="4" data-theme="light" aria-label="Presente y datos bancarios" aria-hidden="true">
+        <div class="info-block pos-top">
+          <p class="info-kicker">Lara &amp; Federico</p>
+          <h2 class="info-heading">Tu presencia es nuestro mejor regalo</h2>
+        </div>
+
+        <div class="info-block pos-bottom">
+          <p class="info-subtext">Si deseás hacernos un presente:</p>
+          <div class="alias-clean-row">
+            <span class="alias-code" id="bank-alias">BODA.FEDE.Y.LARA</span>
+            <button type="button" id="copy-alias-btn" class="btn-secondary btn-sm">Copiar alias</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PARADA 5 (FRAME 600): NOCHE ESTRELLADA / RESUMEN & CONFIRMACIÓN -->
+      <section class="chapter-group" data-stop="5" data-theme="dark" aria-label="Resumen y confirmación de asistencia" aria-hidden="true">
+        <div class="info-block pos-top">
+          <p class="info-kicker">Resumen</p>
+          <p class="info-details"><strong>Civil:</strong> Viernes 12/03 · 10:50 hs · Acha y Elcano</p>
+          <p class="info-details"><strong>Salón del Reino:</strong> Sábado 13/03 · 13:30 hs · Monseñor Rau 1758</p>
+        </div>
+
+        <div class="info-block pos-bottom">
+          <form id="rsvp-form" class="rsvp-clean-form" novalidate>
+            <div class="rsvp-clean-inputs">
+              <label for="guest-name" class="sr-only">Nombre y apellido</label>
+              <input
+                type="text"
+                id="guest-name"
+                name="name"
+                class="clean-input"
+                placeholder="Nombre y apellido"
+                autocomplete="name"
+                required
+              >
+              <label for="guest-event" class="sr-only">Eventos a los que asistirás</label>
+              <select id="guest-event" name="attendance" class="clean-select">
+                <option value="Civil (12/03) y Salón del Reino (13/03)">Asistiré a ambos</option>
+                <option value="Salón del Reino (13/03 - 13:30 hs)">Asistiré al Salón del Reino</option>
+                <option value="Registro Civil (12/03 - 10:50 hs)">Asistiré al Civil</option>
+                <option value="No podré asistir">No podré asistir</option>
+              </select>
+            </div>
+            <button type="submit" class="btn-primary btn-wide">Confirmar asistencia</button>
+          </form>
+        </div>
+      </section>
 
     </div>
 
-  </div>
+    <!-- Subtle Vertical Chapter Navigation Controls (Discreet, Accessible) -->
+    <nav class="chapter-rail" aria-label="Navegación entre escenas">
+      <button type="button" id="nav-prev-btn" class="rail-btn" aria-label="Escena anterior" disabled>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M3.5 10L8 5.5L12.5 10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <button type="button" id="nav-next-btn" class="rail-btn" aria-label="Siguiente escena">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M3.5 6L8 10.5L12.5 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </nav>
 
-  <!-- SCROLL TRACK -->
-  <div id="scroll-track" class="scroll-track" aria-hidden="true"></div>
+  </main>
 
   <!-- TOAST NOTIFICATION -->
-  <div id="toast-notice" class="toast-notice">
+  <div id="toast-notice" class="toast-notice" role="status" aria-live="polite">
     <span id="toast-message">Alias copiado</span>
   </div>
 
