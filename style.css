@@ -1,28 +1,22 @@
 /* ==========================================================================
-   LARA & FEDERICO — EDITORIAL BOTANICAL CHAPTER INVITATION
-   System: DESIGN.md (taste-skill + web-design-guidelines + awesome-design-md)
+   LARA & FEDERICO — SCROLL WORLD V2 (FULL-SCREEN VERTICAL DIORAMA)
+   System: DESIGN.md (scroll-world + taste-skill + web-design-guidelines)
    Palette: Cotton Alabaster (#f6f4ee) & Deep Forest Green (#1c3526)
-   Zero hard borders, zero gold, zero emojis, A11Y & reduced-motion compliant
+   Zero hard borders, zero gold, zero emojis, full-bleed 9:16 mobile canvas
    ========================================================================== */
 
 :root {
   --surface-paper: #f6f4ee;
   --surface-veil-light: rgba(246, 244, 238, 0.88);
-  --surface-veil-dark: rgba(17, 33, 24, 0.82);
 
   --ink-primary: #1c3526;
   --ink-secondary: #2c4c39;
   --ink-muted: #4b6856;
-  --ink-on-dark: #f6f4ee;
-  --ink-on-dark-muted: rgba(246, 244, 238, 0.78);
 
   --tint-subtle: rgba(28, 53, 38, 0.08);
   --tint-subtle-hover: rgba(28, 53, 38, 0.14);
-  --tint-subtle-dark: rgba(246, 244, 238, 0.12);
-  --tint-subtle-dark-hover: rgba(246, 244, 238, 0.2);
 
-  --shadow-editorial: 0 12px 32px rgba(15, 29, 21, 0.08);
-  --shadow-editorial-dark: 0 16px 36px rgba(0, 0, 0, 0.32);
+  --shadow-editorial: 0 12px 32px rgba(15, 29, 21, 0.09);
 
   --font-serif: 'Cormorant Garamond', Georgia, serif;
   --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -69,10 +63,6 @@ body {
 :focus-visible {
   outline: 2px solid var(--ink-primary);
   outline-offset: 2px;
-}
-
-[data-theme="dark"] :focus-visible {
-  outline-color: var(--ink-on-dark);
 }
 
 /* ==========================================================================
@@ -139,7 +129,7 @@ body {
 }
 
 /* ==========================================================================
-   2. FIXED INTERACTIVE CHAPTER STAGE
+   2. FULL-SCREEN VERTICAL SCROLL WORLD STAGE
    ========================================================================== */
 .stage-viewport {
   position: fixed;
@@ -210,23 +200,6 @@ body {
   pointer-events: none;
   transition: opacity 0.45s var(--ease-out-expo), transform 0.45s var(--ease-out-expo), visibility 0.45s;
   will-change: opacity, transform;
-}
-
-/* Dark botanical veil for starry night chapter */
-.chapter-group[data-theme="dark"] .info-block {
-  background: var(--surface-veil-dark);
-  box-shadow: var(--shadow-editorial-dark);
-  color: var(--ink-on-dark);
-}
-
-.chapter-group[data-theme="dark"] .info-kicker,
-.chapter-group[data-theme="dark"] .info-subtext {
-  color: var(--ink-on-dark-muted);
-}
-
-.chapter-group[data-theme="dark"] .info-heading,
-.chapter-group[data-theme="dark"] .info-details {
-  color: var(--ink-on-dark);
 }
 
 .info-block.pos-top {
@@ -434,15 +407,6 @@ body {
   background-color: var(--tint-subtle-hover);
 }
 
-.chapter-group[data-theme="dark"] .btn-primary {
-  background-color: var(--surface-paper);
-  color: var(--ink-primary);
-}
-
-.chapter-group[data-theme="dark"] .btn-primary:hover {
-  background-color: #ebe7dc;
-}
-
 .btn-sm {
   min-height: 36px;
   padding: 7px 14px;
@@ -475,7 +439,7 @@ body {
 }
 
 /* ==========================================================================
-   6. MINIMAL RSVP FORM (DARK BOTANICAL THEME)
+   6. MINIMAL RSVP FORM (WARM EDITORIAL PAPER SURFACE)
    ========================================================================== */
 .rsvp-clean-form {
   display: flex;
@@ -498,27 +462,27 @@ body {
   padding: 9px 14px;
   border-radius: 12px;
   border: none;
-  background: var(--tint-subtle-dark);
+  background: var(--tint-subtle);
   font-family: var(--font-sans);
   font-size: 0.82rem;
-  color: var(--ink-on-dark);
+  color: var(--ink-primary);
   text-align: center;
   outline: none;
   transition: background-color 0.2s ease;
 }
 
 .clean-select option {
-  background-color: #162a1e;
-  color: var(--ink-on-dark);
+  background-color: var(--surface-paper);
+  color: var(--ink-primary);
 }
 
 .clean-input::placeholder {
-  color: var(--ink-on-dark-muted);
+  color: var(--ink-muted);
 }
 
 .clean-input:focus,
 .clean-select:focus {
-  background: var(--tint-subtle-dark-hover);
+  background: var(--tint-subtle-hover);
 }
 
 /* ==========================================================================
@@ -544,7 +508,7 @@ body {
   height: 40px;
   border: none;
   border-radius: 999px;
-  background: rgba(246, 244, 238, 0.78);
+  background: rgba(246, 244, 238, 0.82);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   color: var(--ink-primary);

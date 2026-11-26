@@ -1,6 +1,6 @@
 /* ==========================================================================
-   LARA & FEDERICO — CHAPTER AUTO-PLAYBACK ENGINE (NATIVE 9:16 FRAMES)
-   Stops: 0 (Sobre) → 110 (Torta) → 262 (Civil) → 414 (Salón) → 544 (Auto) → 600 (Noche/RSVP)
+   LARA & FEDERICO — SCROLL WORLD V2 ENGINE (726 CLEANED 9:16 VERTICAL FRAMES)
+   Stops: 0 (Sobre) → 130 (Torta) → 290 (Civil) → 490 (Salón) → 600 (Auto) → 700 (Atardecer/RSVP)
    Triggers: Tap, small scroll/wheel, touch swipe, keyboard arrows, or nav rail
    ========================================================================== */
 
@@ -23,8 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const toastNotice = document.getElementById('toast-notice');
   const toastMessage = document.getElementById('toast-message');
 
-  // Exact chapter stop frames requested by user + opening (0) & starry night finale (600)
-  const CHAPTER_STOPS = [0, 110, 262, 414, 544, 600];
+  // V2 Papercraft Diorama story stops (0-indexed into assets/frames_v2/frame_0000.jpg .. frame_0725.jpg)
+  const CHAPTER_STOPS = [0, 130, 290, 490, 600, 700];
   const CHAPTER_LABELS = [
     'Portada: Lara y Federico',
     'Fecha de la boda y cuenta regresiva',
@@ -34,7 +34,8 @@ document.addEventListener('DOMContentLoaded', () => {
     'Resumen y confirmación de asistencia'
   ];
 
-  const TOTAL_FRAMES = 621;
+  const TOTAL_FRAMES = 726;
+  const FRAMES_DIR = 'assets/frames_v2';
   const frames = new Array(TOTAL_FRAMES).fill(null);
 
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -50,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let lastTouchEndTime = 0;
 
   // ==========================================================================
-  // 1. CANVAS SIZING
+  // 1. CANVAS SIZING (FULL-BLEED VERTICAL)
   // ==========================================================================
   let viewW = window.innerWidth;
   let viewH = window.innerHeight;
@@ -75,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 2. PRIORITY PROGRESSIVE FRAME PRELOADER
   // ==========================================================================
   function getFramePath(index) {
-    return `assets/frames/frame_${String(index).padStart(4, '0')}.jpg`;
+    return `${FRAMES_DIR}/frame_${String(index).padStart(4, '0')}.jpg`;
   }
 
   function loadSingleFrame(index) {
@@ -100,14 +101,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function preloadFrameSequence() {
-    // Stage 0: Load all exact chapter stop frames first so instant jumps always look crisp
+    // Stage 0: Load all exact chapter stop frames first so every stop is crisp immediately
     await Promise.all(CHAPTER_STOPS.map((idx) => loadSingleFrame(idx)));
     drawFrame(0, true);
 
-    // Stage 1: Load coarse pass across 0..600 + dense pass for first segment (0..110)
+    // Stage 1: Dense pass on first segment (0..130) + coarse pass across the full journey (0..700)
     const stage1Set = new Set();
-    for (let i = 0; i <= 110; i += 2) stage1Set.add(i);
-    for (let i = 110; i <= 600; i += 6) stage1Set.add(i);
+    for (let i = 0; i <= 130; i += 2) stage1Set.add(i);
+    for (let i = 130; i <= 700; i += 6) stage1Set.add(i);
     const stage1Indices = Array.from(stage1Set).filter((i) => !frames[i]);
 
     let loadedStage1 = 0;
@@ -128,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Stage 2: Load remaining intermediate frames silently in background for 100% silky playback
     const remainingIndices = [];
-    for (let i = 0; i <= 600; i++) {
+    for (let i = 0; i <= 700; i++) {
       if (!frames[i]) remainingIndices.push(i);
     }
 
@@ -143,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ==========================================================================
-  // 3. DRAW NATIVE 9:16 VERTICAL FRAME
+  // 3. DRAW FULL-BLEED NATIVE 9:16 VERTICAL FRAME
   // ==========================================================================
   function getNearestLoadedFrame(targetIndex) {
     const clamped = Math.max(0, Math.min(TOTAL_FRAMES - 1, targetIndex));
@@ -172,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const img = found.img;
     const sw = img.naturalWidth || 720;
-    const sh = img.naturalHeight || 1280;
+    const sh = img.naturalHeight || 1270;
     const frameAspect = sw / sh;
     const screenAspect = cw / ch;
 
@@ -181,15 +182,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let drawW, drawH, drawX, drawY;
 
     if (screenAspect <= 0.85) {
-      drawW = cw;
-      drawH = drawW / frameAspect;
-      if (drawH < ch) {
-        drawH = ch;
-        drawW = drawH * frameAspect;
-      }
+      // Mobile / Portrait: true full-bleed cover across 100% of the screen
+      const scale = Math.max(cw / sw, ch / sh);
+      drawW = sw * scale;
+      drawH = sh * scale;
       drawX = (cw - drawW) * 0.5;
       drawY = (ch - drawH) * 0.5;
     } else {
+      // Desktop / Landscape: full-height centered 9:16 vertical stage with soft side-feather
       drawH = ch;
       drawW = drawH * frameAspect;
       drawX = (cw - drawW) * 0.5;
@@ -199,9 +199,9 @@ document.addEventListener('DOMContentLoaded', () => {
     worldCtx.save();
     worldCtx.drawImage(img, drawX, drawY, drawW, drawH);
 
-    // Soft side-feather on desktop screens into the pastel botanical cloud backdrop
+    // On wide desktop viewports, gently feather left & right edges into the botanical cloud backdrop
     if (drawX > 4) {
-      const fadeSide = drawW * 0.08;
+      const fadeSide = drawW * 0.07;
       worldCtx.globalCompositeOperation = 'destination-in';
       const hMask = worldCtx.createLinearGradient(drawX, 0, drawX + drawW, 0);
       hMask.addColorStop(0, 'rgba(0, 0, 0, 0)');
@@ -255,11 +255,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     targetStopIndex = clamped;
 
-    // Update nav rail immediately so user gets instant visual feedback
     if (navPrevBtn) navPrevBtn.disabled = clamped <= 0;
     if (navNextBtn) navNextBtn.disabled = clamped >= CHAPTER_STOPS.length - 1;
 
-    // Honor reduced motion preference
     if (prefersReducedMotion.matches) {
       isPlaying = false;
       currentStopIndex = clamped;
@@ -269,7 +267,6 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Fade out overlays during video transition
     clearActiveChapters();
     isPlaying = true;
     lastFrameTimestamp = performance.now();
@@ -301,16 +298,15 @@ document.addEventListener('DOMContentLoaded', () => {
         drawFrame(targetFrame, false);
         setActiveChapter(targetStopIndex);
       } else {
-        // Smooth cinematic playback: ~28 fps cruising speed with gentle ease-out near the stop
-        const cruisingFps = 28;
-        const easeWindow = 18;
-        const speedFactor = distance < easeWindow ? Math.max(0.32, distance / easeWindow) : 1;
+        // Smooth cinematic playback: ~30 fps cruising speed with gentle ease-out near each stop
+        const cruisingFps = 30;
+        const easeWindow = 20;
+        const speedFactor = distance < easeWindow ? Math.max(0.3, distance / easeWindow) : 1;
         const step = Math.sign(diff) * Math.min(distance, cruisingFps * speedFactor * dt);
 
         currentFrame += step;
         drawFrame(Math.round(currentFrame), false);
 
-        // Reveal the destination card slightly early as it settles into the stop
         if (distance <= 4) {
           setActiveChapter(targetStopIndex);
         }
@@ -330,7 +326,6 @@ document.addEventListener('DOMContentLoaded', () => {
     );
   }
 
-  // Mouse wheel / Trackpad small scroll
   window.addEventListener(
     'wheel',
     (e) => {
@@ -342,7 +337,6 @@ document.addEventListener('DOMContentLoaded', () => {
     { passive: false }
   );
 
-  // Touch swipe & tap on mobile
   let touchStartY = 0;
   let touchStartX = 0;
   let touchStartTime = 0;
@@ -370,13 +364,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const dx = touchStartX - e.changedTouches[0].clientX;
       const elapsed = lastTouchEndTime - touchStartTime;
 
-      // Short vertical swipe
       if (Math.abs(dy) >= 26 && Math.abs(dy) > Math.abs(dx)) {
         advanceChapter(dy > 0 ? 1 : -1);
         return;
       }
 
-      // Clean tap on screen → play to next stop
       if (Math.abs(dy) < 12 && Math.abs(dx) < 12 && elapsed < 350) {
         if (targetStopIndex < CHAPTER_STOPS.length - 1) {
           advanceChapter(1);
@@ -386,9 +378,7 @@ document.addEventListener('DOMContentLoaded', () => {
     { passive: true }
   );
 
-  // Mouse click on desktop stage → play to next stop
   stageViewport.addEventListener('click', (e) => {
-    // Ignore synthetic click immediately following touch
     if (performance.now() - lastTouchEndTime < 450) return;
     if (isInteractiveTarget(e.target)) return;
     if (targetStopIndex < CHAPTER_STOPS.length - 1) {
@@ -396,7 +386,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Explicit prompt & rail buttons
   document.querySelectorAll('[data-action="next"]').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -418,7 +407,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Keyboard navigation (A11Y)
   window.addEventListener('keydown', (e) => {
     const activeTag = document.activeElement?.tagName;
     if (activeTag === 'INPUT' || activeTag === 'SELECT' || activeTag === 'TEXTAREA') {
