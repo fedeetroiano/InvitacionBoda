@@ -23,8 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const toastNotice = document.getElementById('toast-notice');
   const toastMessage = document.getElementById('toast-message');
 
-  // V2 Papercraft Diorama story stops (0-indexed into assets/frames_v2/frame_0000.jpg .. frame_0725.jpg)
-  const CHAPTER_STOPS = [0, 130, 290, 490, 600, 700];
+  // V2 Papercraft Diorama exact story stops (0-indexed: scene 1, 136, 303, 519, 704, black screen 736)
+  const CHAPTER_STOPS = [0, 135, 302, 518, 703, 735];
   const CHAPTER_LABELS = [
     'Portada: Lara y Federico',
     'Fecha de la boda y cuenta regresiva',
@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     'Resumen y confirmación de asistencia'
   ];
 
-  const TOTAL_FRAMES = 726;
+  const TOTAL_FRAMES = 736;
   const FRAMES_DIR = 'assets/frames_v2';
   const frames = new Array(TOTAL_FRAMES).fill(null);
 
@@ -105,10 +105,10 @@ document.addEventListener('DOMContentLoaded', () => {
     await Promise.all(CHAPTER_STOPS.map((idx) => loadSingleFrame(idx)));
     drawFrame(0, true);
 
-    // Stage 1: Dense pass on first segment (0..130) + coarse pass across the full journey (0..700)
+    // Stage 1: Dense pass on first segment (0..135) + coarse pass across the full journey (0..735)
     const stage1Set = new Set();
-    for (let i = 0; i <= 130; i += 2) stage1Set.add(i);
-    for (let i = 130; i <= 700; i += 6) stage1Set.add(i);
+    for (let i = 0; i <= 135; i += 2) stage1Set.add(i);
+    for (let i = 135; i <= 735; i += 6) stage1Set.add(i);
     const stage1Indices = Array.from(stage1Set).filter((i) => !frames[i]);
 
     let loadedStage1 = 0;
@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Stage 2: Load remaining intermediate frames silently in background for 100% silky playback
     const remainingIndices = [];
-    for (let i = 0; i <= 700; i++) {
+    for (let i = 0; i <= 735; i++) {
       if (!frames[i]) remainingIndices.push(i);
     }
 
